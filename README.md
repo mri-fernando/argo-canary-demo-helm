@@ -137,5 +137,18 @@ kubectl logs -n argo-rollouts deploy/argo-rollouts -f
 kubectl port-forward svc/istio-ingress -n istio-system 8081:80
 ```
 
+Get the public IP
+```
+ kubectl -n istio-system get svc istio-ingress -o yaml 
+
+ ```
+
+```
+curl -H "Host: mario-app-demo.mario.com" http://4.147.48.56
+```
+
+
+
+
 
 
