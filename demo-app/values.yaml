@@ -2,3 +2,16 @@ replicaCount: 2
 image:
   repository: roshaneishara/argo-canary-demo-app
   tag: v6
+  pullPolicy: Always
+
+service:
+  port: 80
+  targetPort: 5000
+
+rollout:
+  steps:
+    - setWeight: 20
+    - pause: { duration: 30s }
+    - setWeight: 50
+    - pause: { duration: 30s }
+
