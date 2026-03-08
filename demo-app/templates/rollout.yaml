@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: demo-app
+spec:
+  replicas: {{ .Values.replicaCount }}
+
+  strategy:
+    canary:
+
+      canaryService: demo-app-canary
+      stableService: demo-app-stable
+
+      trafficRouting:
+        istio:
+          virtualService:
+            name: demo-app
+            routes:
+              - http
+
+      steps:
+{{ toYaml .Values.rollout.steps | indent 8 }}
+
+  selector:
+    matchLabels:
+      app: demo-app
+
+  template:
+    metadata:
+      labels:
+        app: demo-app
+    spec:
+      containers:
+        - name: demo-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
