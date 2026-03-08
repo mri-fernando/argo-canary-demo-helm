@@ -1,7 +1,7 @@
 replicaCount: 2
 image:
   repository: roshaneishara/argo-canary-demo-app
-  tag: v7
+  tag: v8
   pullPolicy: Always
 
 service:
