@@ -2,9 +2,11 @@ apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: demo-app
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   hosts:
-    - demo-app
+    - demo-app.demo.svc.cluster.local
   http:
     - name: http
       route:

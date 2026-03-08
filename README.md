@@ -111,7 +111,7 @@ spec:
 
 ** Apply the YAML (In realworld this could be a CI CD pipeline doing it)
 ```
-kubectl apply -f argocd-app.yaml
+kubectl apply -f application.yaml
 ```
 
 ** Verify RolloutWorks
@@ -125,6 +125,11 @@ kubectl argo rollouts get rollout demo-app -n demo -w
 ** RollOuts Dashboard
 ```
 kubectl argo rollouts dashboard
+```
+
+** Troubleshooting
+```
+kubectl logs -n argo-rollouts deploy/argo-rollouts | grep -i error
 ```
 
 
