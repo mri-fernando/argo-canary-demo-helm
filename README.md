@@ -129,7 +129,12 @@ kubectl argo rollouts dashboard
 
 ** Troubleshooting
 ```
-kubectl logs -n argo-rollouts deploy/argo-rollouts | grep -i error
+kubectl logs -n argo-rollouts deploy/argo-rollouts -f
+```
+
+** Access the APP using 
+```
+kubectl port-forward svc/istio-ingress -n istio-system 8081:80
 ```
 
 
