@@ -132,7 +132,15 @@ kubectl argo rollouts dashboard
 kubectl logs -n argo-rollouts deploy/argo-rollouts -f
 ```
 
-** Access the APP using 
+** Access the APP
+
+*** Using the k8s service (This works!!)
+```
+kubectl port-forward svc/demo-app -n demo 8081:80
+```
+
+
+*** using Istio Ingress Gateway (Need to verify this !!!!)
 ```
 kubectl port-forward svc/istio-ingress -n istio-system 8081:80
 ```

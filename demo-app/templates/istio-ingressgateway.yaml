@@ -4,7 +4,7 @@ metadata:
   name: demo-app-gateway
 spec:
   selector:
-    istio: ingressgateway # use Istio's default ingressgateway
+    istio: ingress # use Istio's default ingressgateway
   servers:
     - port:
         number: 80
