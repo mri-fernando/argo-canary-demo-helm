@@ -9,7 +9,7 @@ spec:
     - prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local
     - $ {{ .Values.prometheus.host }}
   http:
-    - name: http
+    - name: prom-http
       route:
         - destination:
             host: prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local

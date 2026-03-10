@@ -14,7 +14,7 @@ spec:
     - "{{ .Values.app.host }}"
   - port:
       number: 80
-      name: http
+      name: prom-http
       protocol: HTTP
     hosts:
     - "{{ .Values.prometheus.host }}"    
