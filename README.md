@@ -181,13 +181,38 @@ Access Prometheus: http://prometheus.mario.com/query
 
 
 
-** Bump app.py and rollout a new version
-This will return a mix of traffic to both stable and canary
+** Bump app.py and rollout a new version using manual promote
+
+Now bump the values.yaml to following
 ```
-while True; do curl -H "Host: mario-app-demo.mario.com" http://4.147.48.56; sleep 1; echo -e "\n\n"; done 
+rollout:
+  steps:
+  - setWeight: 10
+  - pause: {}  # Waits for manual promotion
+  - setWeight: 50
+  - pause: {duration: 5m}
+
 ```
 
+** This will return a mix of traffic to both stable and canary
+```
+while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
+```
+
+
+** Manually promote the canary 
+```
+kubectl argo rollouts promote demo-app -n demo
+
+# If something goes wrong
+kubectl argo rollouts abort demo-app -n demo
+
+```
+
+
+** RollBack Demo
 ** Bump app.py and rollout a buggy version
+
 
 
 ** Demonstrate how rollback works 
