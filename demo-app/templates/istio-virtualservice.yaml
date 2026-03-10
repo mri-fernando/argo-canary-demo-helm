@@ -9,7 +9,7 @@ spec:
     - demo-app-gateway
   hosts:
     - demo-app.demo.svc.cluster.local
-    - mario-app-demo.mario.com
+    - demo-app.mario.com
   http:
     - name: http
       route:

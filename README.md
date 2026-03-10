@@ -134,13 +134,14 @@ kubectl logs -n argo-rollouts deploy/argo-rollouts -f
 
 ** Access the APP
 
-*** Using the k8s service (This works!!)
+*** Using the k8s service will not loadbalance as we're bypassing the Istio VirtualService, so it will always be going to the same set of pods
 ```
 kubectl port-forward svc/demo-app -n demo 8081:80
+curl -vvv http://localhosts:8081
 ```
 
 
-*** using Istio Ingress Gateway (Need to verify this !!!!)
+*** using Istio Ingress Gateway
 ```
 kubectl port-forward svc/istio-ingress -n istio-system 8081:80
 ```
@@ -151,9 +152,12 @@ Get the public IP
 
  ```
 
+This will return a mix of traffic to both stable and canary
 ```
-curl -H "Host: mario-app-demo.mario.com" http://4.147.48.56
+while True; do curl -H "Host: mario-app-demo.mario.com" http://4.147.48.56; sleep 1; echo -e "\n\n"; done 
 ```
+
+
 
 
 
