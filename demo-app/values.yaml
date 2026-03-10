@@ -1,4 +1,14 @@
 replicaCount: 2
+
+argo:
+  host: argo-demo.mario.com
+
+app:
+  host: demo-app.mario.com
+
+prometheus:
+  host: prometheus.mario.com
+
 image:
   repository: roshaneishara/argo-canary-demo-app
   tag: v15

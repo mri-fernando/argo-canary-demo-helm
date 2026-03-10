@@ -11,12 +11,18 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "demo-app.mario.com"
+    - "${{ .Values.app.host }}"\
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "${{ .Values.prometheus.host }}"    
   - port: 
       number: 443
       name: https
       protocol: TLS
     hosts:
-    - "argo-demo.mario.com"
+    - "{{ .Values.argocd.host }}"
     tls:
       mode: PASSTHROUGH

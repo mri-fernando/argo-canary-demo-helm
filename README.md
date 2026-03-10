@@ -65,6 +65,9 @@ https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 kubectl get pods -n argocd
 
+# Get URL for ArgoCD
+k get gateway -n demo -o yaml
+
 kubectl -n argocd get secret argocd-initial-admin-secret \
 -o jsonpath="{.data.password}" | base64 -d
 
@@ -72,6 +75,19 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 username: admin
 password: <output>
+```
+
+** Install Prometheus using helm chart
+
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+kubectl create namespace monitoring
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --set grafana.enabled=false \
+  --set alertmanager.enabled=false \
+  --create-namespace 
 ```
 
 ** Create ArgoCD application

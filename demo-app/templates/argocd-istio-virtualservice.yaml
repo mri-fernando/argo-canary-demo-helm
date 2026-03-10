@@ -6,12 +6,12 @@ spec:
   gateways: 
     - demo-app-gateway
   hosts:
-    - argo-demo.mario.com
+    - {{ .Values.argocd.host }}
   tls:
     - match:
         - port: 443
           sniHosts:
-            - argo-demo.mario.com
+            - ${{ .Values.argocd.host }}
       route:
         - destination:
             host: argocd-server.argocd.svc.cluster.local
