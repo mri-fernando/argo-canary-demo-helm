@@ -200,7 +200,23 @@ kubectl port-forward po/demo-app-545b8b555b-b44nk -n demo 15090:15090
 curl http://localhost:15090/stats/prometheus
 ```
 
+** Display the prometheus metrics in the UI 
+
+Send some requests to http://demo-app.mario.com/
+
+http://prometheus.mario.com/query 
+Metric: istio_requests_total
+
+
 ** Demonstrate how prometheus analysis template works with Canary
+
+Bump build.yaml to a new release
+
+
+kubectl describe AnalysisTemplate -n demo
+kubectl get virtualservice demo-app -n demo -o yaml
+kubectl argo rollouts get rollout demo-app -n demo -w
+
 
 
 ** Access Prometheus UI and show the Istio metrics

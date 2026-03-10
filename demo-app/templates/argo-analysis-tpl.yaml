@@ -10,6 +10,7 @@ spec:
   metrics:
   - name: success-rate
     interval: 30s
+    count: 5
     successCondition: result[0] >= 0.99
     failureLimit: 3
 
