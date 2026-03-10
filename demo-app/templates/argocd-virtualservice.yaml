@@ -12,3 +12,5 @@ spec:
     route:
     - destination:
         host: argocd-server.argocd.svc.cluster.local
+        port:
+          number: 443
