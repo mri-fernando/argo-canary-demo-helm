@@ -20,5 +20,7 @@ spec:
     - "argo-demo.mario.com"
     tls:
       mode: SIMPLE
-      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      credentialName: istio-ca-secret
+      
+      # serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      # privateKey: /etc/istio/ingressgateway-certs/tls.key
