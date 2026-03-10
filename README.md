@@ -172,6 +172,9 @@ Update /etc/hosts
 
 ```
 sudo vi /etc/hosts
+4.147.48.56 demo-app.mario.com
+4.147.48.56 argo-demo.mario.com
+4.147.48.56 prometheus.mario.com
 ```
 
 ** Access ArgoCD, Prometheus and App UI
@@ -180,8 +183,8 @@ Access ArgoCD: http://argo-demo.mario.com/query
 Access Prometheus: http://prometheus.mario.com/query 
 
 
-
-** Bump app.py and rollout a new version using manual promote
+**Demonstrate manual promote
+*** Bump app.py and rollout a new version 
 
 Now bump the values.yaml to following
 ```
@@ -209,14 +212,6 @@ kubectl argo rollouts abort demo-app -n demo
 
 ```
 
-
-** RollBack Demo
-** Bump app.py and rollout a buggy version
-
-
-
-** Demonstrate how rollback works 
-
 ** Demo Istio Prometheus metrics 
 
 ``` 
@@ -232,19 +227,66 @@ Send some requests to http://demo-app.mario.com/
 http://prometheus.mario.com/query 
 Metric: istio_requests_total
 
+Monitor the prometheus UI
+http://prometheus.mario.com/
 
-** Demonstrate how prometheus analysis template works with Canary
+```
+          sum(rate(istio_requests_total{
+            reporter="destination",
+            destination_service=~"demo-app-canary.demo.svc.cluster.local",
+            destination_workload_namespace="demo",
+            response_code!~"5.*"
+          }[2m])) 
+          /
+          sum(rate(istio_requests_total{
+            reporter="destination",
+            destination_service=~"demo-app-canary.demo.svc.cluster.local",
+            destination_workload_namespace="demo"
+          }[2m]))
+```
 
-Bump build.yaml to a new release
+** Automated Promotion Demo
+
+Keep this running in the backgrou
+while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
+
+Bump values.yaml in rollout block
 
 
-kubectl describe AnalysisTemplate -n demo
-kubectl get virtualservice demo-app -n demo -o yaml
+** Automated RollBack Demo
+** Bump app.py and rollout a buggy version
+
+Push app.py Changes
+Sync ArgoCD application, this should deploy a new one
+
+Now monitor the rollout
+
+```
 kubectl argo rollouts get rollout demo-app -n demo -w
+kubectl get virtualservice  demo-app -n demo -o yaml 
+kubectl describe AnalysisTemplate -n demo
+
+```
+
+Monitor the prometheus UI
+http://prometheus.mario.com/
+
+```
+          sum(rate(istio_requests_total{
+            reporter="destination",
+            destination_service=~"demo-app-canary.demo.svc.cluster.local",
+            destination_workload_namespace="demo",
+            response_code!~"5.*"
+          }[2m])) 
+          /
+          sum(rate(istio_requests_total{
+            reporter="destination",
+            destination_service=~"demo-app-canary.demo.svc.cluster.local",
+            destination_workload_namespace="demo"
+          }[2m]))
+```
 
 
-
-** Access Prometheus UI and show the Istio metrics
 
 ** Demonstrate how Blue Green works with Argo Rollouts
 

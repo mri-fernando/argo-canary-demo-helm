@@ -19,6 +19,7 @@ service:
   targetPort: 5000
 
 rollout:
+  # Template with Analysis steps with prometheus metrics to automatically promote or rollback based on the success rate of the canary version
   steps:
     - setWeight: 10
     - pause: { duration: 30s }
@@ -40,5 +41,12 @@ rollout:
           value: demo-app-canary.demo.svc.cluster.local
         - name: namespace
           value: demo
+
+  # Template with Manual Promote step
+  # steps:
+  # - setWeight: 10
+  # - pause: {}  # Waits for manual promotion
+  # - setWeight: 50
+  # - pause: {duration: 5m}
 
 
