@@ -31,7 +31,7 @@ rollout:
         - name: namespace
           value: demo
     - setWeight: 50
-    - pause: {duration: 2m}
+    - pause: {duration: 30s}
     - analysis:
         templates:
         - templateName: istio-success-rate
