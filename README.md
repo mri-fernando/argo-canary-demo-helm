@@ -168,10 +168,40 @@ Get the public IP
 
  ```
 
+Update /etc/hosts
+
+```
+sudo vi /etc/hosts
+```
+
+** Access ArgoCD, Prometheus and App UI
+Access App: http://demo-app.mario.com/query 
+Access ArgoCD: http://argo-demo.mario.com/query 
+Access Prometheus: http://prometheus.mario.com/query 
+
+
+
+** Bump app.py and rollout a new version
 This will return a mix of traffic to both stable and canary
 ```
 while True; do curl -H "Host: mario-app-demo.mario.com" http://4.147.48.56; sleep 1; echo -e "\n\n"; done 
 ```
+
+** Bump app.py and rollout a buggy version
+
+
+** Demonstrate how rollback works 
+
+** Demonstrate how prometheus analysis template works with Canary
+
+``` 
+kubectl get servicemonitor -n monitoring -o yaml 
+
+```
+** Demonstrate how Blue Green works with Argo Rollouts
+
+
+
 
 
 
