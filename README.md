@@ -198,6 +198,9 @@ while True; do curl -H "Host: mario-app-demo.mario.com" http://4.147.48.56; slee
 kubectl get servicemonitor -n monitoring -o yaml 
 
 ```
+
+** Access Prometheus UI and show the Istio metrics
+
 ** Demonstrate how Blue Green works with Argo Rollouts
 
 
