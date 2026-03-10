@@ -192,12 +192,16 @@ while True; do curl -H "Host: mario-app-demo.mario.com" http://4.147.48.56; slee
 
 ** Demonstrate how rollback works 
 
-** Demonstrate how prometheus analysis template works with Canary
+** Demo Istio Prometheus metrics 
 
 ``` 
 kubectl get servicemonitor -n monitoring -o yaml 
-
+kubectl port-forward po/demo-app-545b8b555b-b44nk -n demo 15090:15090
+curl http://localhost:15090/stats/prometheus
 ```
+
+** Demonstrate how prometheus analysis template works with Canary
+
 
 ** Access Prometheus UI and show the Istio metrics
 
