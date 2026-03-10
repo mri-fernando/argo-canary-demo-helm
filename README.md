@@ -130,7 +130,7 @@ spec:
 kubectl apply -f application.yaml
 ```
 
-** Verify RolloutWorks
+** Verify Rollout Works
 ```
 kubectl get rollouts -n demo
 
@@ -138,7 +138,7 @@ kubectl argo rollouts get rollout demo-app -n demo -w
 
 ```
 
-** RollOuts Dashboard
+** OPTIONAL: RollOuts Dashboard
 ```
 kubectl argo rollouts dashboard
 ```
@@ -247,17 +247,20 @@ http://prometheus.mario.com/
 
 ** Automated Promotion Demo
 
-Keep this running in the backgrou
+Keep this running in the background
 while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
 
 Bump values.yaml in rollout block
+Sync ArgoCD application 
 
 
 ** Automated RollBack Demo
-** Bump app.py and rollout a buggy version
+** Bump app.py and push and Github actions should rollout a buggy version
+https://github.com/mri-fernando/argo-canary-demo-app/actions
 
-Push app.py Changes
+
 Sync ArgoCD application, this should deploy a new one
+
 
 Now monitor the rollout
 
@@ -293,7 +296,15 @@ http://prometheus.mario.com/
 
 
 
+# TODO
 
+Blue Green demo completion
+Git pull issues with argo-canary-demo-helm repo
+move unwanted yaml out of templates to a separate directory in argo-canary-demo-helm repo
+Presentation
+Nice diagrams
+Github actions credits
+Azure credits
 
 
 

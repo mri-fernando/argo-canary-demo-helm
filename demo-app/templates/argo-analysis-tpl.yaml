@@ -10,9 +10,9 @@ spec:
   metrics:
   - name: success-rate
     interval: 30s
-    count: 1  # Only query once per analysis run, since we're using a rate() function in the query which already looks at a time window
+    count: 1  # Only query only once per analysis run (For demo purposes - For production this should be more), since we're using a rate() function in the query which already looks at a time window
     successCondition: result[0] >= 0.99 # Consider the analysis successful if the success rate is above 99%
-    failureLimit: 2 # Allow up to 2 failures before the analysis is considered failed, since there might be some noise in the metrics
+    failureLimit: 1 # Allow up to 1 failure for demo purposes (For production this should be more) before the analysis is considered failed, since there might be some noise in the metrics
 
     provider:
       prometheus:
