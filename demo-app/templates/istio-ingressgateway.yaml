@@ -15,9 +15,6 @@ spec:
     - port: 443
       name: https
       protocol: HTTPS
-      tls:
-        mode: SIMPLE
-        credentialName: demo-app-tls
       hosts:
         - "argo-demo.mario.com"
       tls:
