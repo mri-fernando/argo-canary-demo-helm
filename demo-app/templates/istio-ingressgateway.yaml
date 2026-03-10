@@ -11,13 +11,13 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "${{ .Values.app.host }}"
+    - "{{ .Values.app.host }}"
   - port:
       number: 80
       name: http
       protocol: HTTP
     hosts:
-    - "${{ .Values.prometheus.host }}"    
+    - "{{ .Values.prometheus.host }}"    
   - port: 
       number: 443
       name: https

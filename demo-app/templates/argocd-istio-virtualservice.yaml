@@ -11,7 +11,7 @@ spec:
     - match:
         - port: 443
           sniHosts:
-            - ${{ .Values.argocd.host }}
+            - "{{ .Values.argocd.host }}"
       route:
         - destination:
             host: argocd-server.argocd.svc.cluster.local
