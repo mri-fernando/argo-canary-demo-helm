@@ -9,7 +9,7 @@ spec:
     - demo-app-gateway
   hosts:
     - demo-app.demo.svc.cluster.local
-    - $ {{ .Values.app.host }}
+    - {{ .Values.app.host }}
   http:
     - name: http
       route:

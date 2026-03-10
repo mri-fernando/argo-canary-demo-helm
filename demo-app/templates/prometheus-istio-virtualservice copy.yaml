@@ -7,7 +7,7 @@ spec:
     - demo-app-gateway
   hosts:
     - prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local
-    - $ {{ .Values.prometheus.host }}
+    - "{{ .Values.prometheus.host }}""
   http:
     - name: prom-http
       route:
