@@ -15,9 +15,8 @@ spec:
   - port: 
       number: 443
       name: https
-      protocol: HTTPS
+      protocol: TLS
     hosts:
     - "argo-demo.mario.com"
     tls:
-      mode: SIMPLE
-      credentialName: istio-ca-secret
+      mode: PASSTHROUGH

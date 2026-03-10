@@ -7,10 +7,13 @@ spec:
     - demo-app-gateway
   hosts:
     - argo-demo.mario.com
-  http:
-  - timeout: 5s
-    route:
-    - destination:
-        host: argocd-server.argocd.svc.cluster.local
-        port:
-          number: 443
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+            - argo-demo.mario.com
+      route:
+        - destination:
+            host: argocd-server.argocd.svc.cluster.local
+            port:
+              number: 443          
