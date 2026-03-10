@@ -21,6 +21,3 @@ spec:
     tls:
       mode: SIMPLE
       credentialName: istio-ca-secret
-      
-      # serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-      # privateKey: /etc/istio/ingressgateway-certs/tls.key
