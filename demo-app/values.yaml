@@ -1,6 +1,6 @@
 replicaCount: 2
 
-argo:
+argocd:
   host: argo-demo.mario.com
 
 app:
