@@ -298,6 +298,7 @@ http://prometheus.mario.com/
 
 # TODO
 
+Finetune count: 1 and failureLimit to properly test the buggy version scenario
 Blue Green demo completion
 Git pull issues with argo-canary-demo-helm repo
 move unwanted yaml out of templates to a separate directory in argo-canary-demo-helm repo
