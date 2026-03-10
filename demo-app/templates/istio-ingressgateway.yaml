@@ -11,4 +11,16 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - "*" 
+        - "*"
+    - port: 443
+      name: https
+      protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: demo-app-tls
+      hosts:
+        - "argo-demo.mario.com"
+      tls:
+        mode: SIMPLE
+        serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+        privateKey: /etc/istio/ingressgateway-certs/tls.key
