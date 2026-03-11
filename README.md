@@ -270,6 +270,24 @@ rollout:
 ```shell
 while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
 ```
+### Demonstrate Traffic Splitting using Istio VirtualService and svc objects selectors
+```shell
+kubectl get svc -n demo  demo-app-stable -o yaml
+...
+  selector:
+    app: demo-app
+    rollouts-pod-template-hash: "7876768768"
+
+kubectl get svc -n demo  demo-app-canary -o yaml
+
+kubectl get rs -n demo
+NAME                  DESIRED   CURRENT   READY   AGE
+demo-app-7876768768   2         2         2       3h13m
+demo-app-86ddf7f6d7   0         0         0       5h32m
+...
+...
+
+```
 
 ### Manually Promote the Canary
 
@@ -464,15 +482,29 @@ kubectl argo rollouts retry rollout demo-app -n demo
 ## TODO
 
 - Zero Time deployments explanation - Canary , Blue/Green strategies
+
 - Finetune `count: 1` and `failureLimit` to properly test the buggy version scenario
+
 - Blue-Green demo completion
+
 - Git pull issues with argo-canary-demo-helm repo when `values.yaml` is updated by you and GHES pipeline - Need to work out a solution
+
 - Move unwanted YAML out of templates to a separate directory in argo-canary-demo-helm repo
+
 - Understand how rollout canary 50% works with multiple replicas (study values.yamls rollout.steps parameters)
+
+- Que: Does rollout CRD support readiness/liveness probes - Ans: Yes, the Argo Rollouts CRD fully supports readiness and liveness probes. You define these probes in the pod template section of the Rollout resource, just like in a standard Kubernetes Deployment
+
+- Que: By default does the traffic sent once the pod is up/running - Analysis runs after pod initialization and readiness probe passes - Ans: The pod must be ready for the analysis template to execute.
+
 - How the usual PR request goes to release the app (NOTE: In this demo it's directly pushed to main branch)
+
 - Presentation
+
 - Nice diagrams
+
 - Github Actions credits (Load a Credit card)
+
 - Azure credits (Load a Credit card)
 
 

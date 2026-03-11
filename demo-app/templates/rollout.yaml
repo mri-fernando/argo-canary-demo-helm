@@ -8,6 +8,8 @@ spec:
   replicas: {{ .Values.replicaCount }}
 
   strategy:
+{{- $strategy := default "rolling-update" .Values.deploymentStrategy -}}
+{{- if eq $strategy "canary" }}
     canary:
 
       canaryService: demo-app-canary
@@ -21,7 +23,18 @@ spec:
               - http
 
       steps:
-{{ toYaml .Values.rollout.steps | indent 8 }}
+{{ toYaml .Values.canary.rollout.steps | indent 8 }}
+{{- else if eq $strategy "blue-green" }}
+    blueGreen:
+      activeService: demo-app-stable
+      previewService: demo-app-canary
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 30
+      prePromotionAnalysis:
+{{ toYaml .Values.bluegreen.prePromotionAnalysis.templates | indent 8 }}
+
+{{- end }}
+
 
   selector:
     matchLabels:
