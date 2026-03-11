@@ -19,7 +19,7 @@ service:
   targetPort: 5000
 
 rollout:
-  #Template with Analysis steps with prometheus metrics to automatically promote or rollback based on the success rate of the canary version
+   #Template with Analysis steps with prometheus metrics to automatically promote or rollback based on the success rate of the canary version
   steps:
     - setWeight: 10
     - pause: { duration: 30s }
