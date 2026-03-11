@@ -112,6 +112,11 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 ### 6. Helm chart structure
 
 ```shell
+helm template demo-app ./demo-app
+```
+--- 
+
+```shell
 tree demo-app/templates 
 demo-app/templates
 ├── app-istio-virtualservice.yaml

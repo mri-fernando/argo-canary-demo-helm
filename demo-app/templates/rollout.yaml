@@ -31,7 +31,7 @@ spec:
       autoPromotionEnabled: false
       scaleDownDelaySeconds: 30
       prePromotionAnalysis:
-{{ toYaml .Values.bluegreen.prePromotionAnalysis.templates | indent 8 }}
+{{ toYaml .Values.bluegreen.prePromotionAnalysis | indent 8 }}
 
 {{- end }}
 
