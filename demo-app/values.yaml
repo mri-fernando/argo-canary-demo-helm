@@ -19,7 +19,7 @@ service:
   targetPort: 5000
 
 canary:
-  success: 0.40 # Success rate threshold for the analysis template
+  success: 0.99 # Success rate threshold for the analysis template
 
 rollout:
    #Template with Analysis steps with prometheus metrics to automatically promote or rollback based on the success rate of the canary version
