@@ -11,7 +11,7 @@ spec:
   - name: success-rate
     interval: 30s
     count: 2  # Query 2 times per analysis run, since we're using a rate() function in the query which already looks at a time window
-    successCondition: result[0] >= {{ .Values.canary.success }} # Consider the analysis successful if the success rate is above 99%
+    successCondition: result[0] >= {{ .Values.canaryAnalysis.success }} # Consider the analysis successful if the success rate is above 99%
     failureLimit: 1 # Allow up to 1 failure for demo purposes
 
     provider:

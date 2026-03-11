@@ -500,7 +500,11 @@ kubectl argo rollouts retry rollout demo-app -n demo
 
 - Que: Does rollout CRD support readiness/liveness probes - Ans: Yes, the Argo Rollouts CRD fully supports readiness and liveness probes. You define these probes in the pod template section of the Rollout resource, just like in a standard Kubernetes Deployment
 
-- Que: By default does the traffic sent once the pod is up/running - Analysis runs after pod initialization and readiness probe passes - Ans: The pod must be ready for the analysis template to execute.
+- Que: By default does the traffic sent once the pod is up/running - Analysis runs after pod initialization and readiness probe passes - Ans: The pod must be ready for the analysis template to execute
+
+- Que: Why use Istio as the Ingress for North South Traffic - That's to keep it simple as we don't need to introduce more complexity 
+
+- Que: Why not use Istio subset level (istio destination rules) but use Host level traffic - Ans: With host-level splitting, the VirtualService requires different host values to split among the two destinations. However, using two host values implies the use of different DNS names (one for the canary, the other for the stable). For north-south traffic, which reaches the Service through the Istio Gateway, having multiple DNS names to reach the canary vs. stable pods may not matter. However, for east-west or intra-cluster traffic, it forces microservice-to-microservice communication to choose whether to hit the stable or the canary DNS name, go through the gateway, or add DNS entries for the VirtualServices. In this situation, the DestinationRule subset traffic splitting would be a better option for intra-cluster canarying.
 
 - How the usual PR request goes to release the app (NOTE: In this demo it's directly pushed to main branch)
 
