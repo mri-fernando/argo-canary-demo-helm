@@ -296,6 +296,7 @@ demo-app-86ddf7f6d7   0         0         0       5h32m
 
 ### Manually Promote the Canary
 
+* You can use the ArgoCD UI to promote or use the CLI  
 ```shell
 kubectl argo rollouts promote demo-app -n demo
 ```
