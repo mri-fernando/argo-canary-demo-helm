@@ -275,23 +275,38 @@ while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e
 
 ```shell
 kubectl argo rollouts promote demo-app -n demo
-# If something goes wrong
-kubectl argo rollouts abort demo-app -n demo
 ```
 
+#### Check the Istio VirtualService weights 
+```shell
+kubectl get virtualservice  demo-app -n demo -o yaml
+
+```
+
+#### NOTE: If something goes wrong
+
+```shell
+kubectl argo rollouts abort demo-app -n demo
+```
 ---
 
-## Istio Prometheus Metrics Demo
+## Istio Envoy Prometheus Metrics Demo
 
 ```shell
 kubectl get servicemonitor -n monitoring -o yaml
+kubectl get po -n demo
+
 kubectl port-forward po/demo-app-545b8b555b-b44nk -n demo 15090:15090
-curl http://localhost:15090/stats/prometheus
+curl http://localhost:15090/stats/prometheus  | grep -i istio_requests_total
 ```
 
 ### Display Prometheus Metrics in the UI
 
 Send requests to [http://demo-app.mario.com/](http://demo-app.mario.com/)
+
+```shell
+while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
+```
 
 - Prometheus UI: [http://prometheus.mario.com/](http://prometheus.mario.com/)
 - Metric: `istio_requests_total`
@@ -323,18 +338,81 @@ Keep this running in the background:
 while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
 ```
 
-- Bump `values.yaml` in rollout block
+- Bump `values.yaml` in rollout block to 
+
+```shell
+rollout:
+  steps:
+    - setWeight: 10
+    - pause: { duration: 30s }
+    - analysis:
+        templates:
+        - templateName: istio-success-rate
+        args:
+        - name: service-name
+          value: demo-app-canary.demo.svc.cluster.local
+        - name: namespace
+          value: demo
+    - setWeight: 50
+    - pause: {duration: 30s}
+    - analysis:
+        templates:
+        - templateName: istio-success-rate
+        args:
+        - name: service-name
+          value: demo-app-canary.demo.svc.cluster.local
+        - name: namespace
+          value: demo
+
+```
+
+- Commit and Push values.yaml 
+
+
+### Bump app.py and Rollout a New Version
+
+Bump app.py
+```shell
+@app.route("/")
+def home():
+...
+...
+    return "Hello Auckland k8s Demo - From version 16"
+```
+
+Send continuous traffic
+```shell
+while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
+```
+
 - Sync ArgoCD application
+
+Verify the virtual service weights
+
+```shell
+kubectl get virtualservice  demo-app -n demo -o yaml
+
+```
+
 
 ---
 
-## Automated Rollback Demo
+## Automated Rollback Demo - With a Buggy App
 
-- Bump `app.py` and push (Github Actions should rollout a buggy version)
+- Bump `app.py` and commit / push (Github Actions should rollout a buggy version)
+
+```shell
+@app.route("/")
+def home():
+    if random.random() < 0.5:  # 50% chance to fail
+        return "simulated failure", 500
+    return "Hello Auckland k8s Demo - From version 15"
+```
+
 - [Github Actions](https://github.com/mri-fernando/argo-canary-demo-app/actions)
 - Sync ArgoCD application (deploys new version)
 
-Monitor the rollout:
+### Monitor the rollout
 
 ```shell
 kubectl argo rollouts get rollout demo-app -n demo -w
@@ -342,7 +420,7 @@ kubectl get virtualservice demo-app -n demo -o yaml
 kubectl describe AnalysisTemplate -n demo
 ```
 
-Monitor Prometheus UI:
+### Monitor Prometheus UI:
 
 - [http://prometheus.mario.com/](http://prometheus.mario.com/)
 
@@ -373,10 +451,13 @@ Demonstrate how Blue-Green works with Argo Rollouts.
 
 ## TODO
 
+- Zero Time deployments explanation - Canary , Blue/Green strategies
 - Finetune `count: 1` and `failureLimit` to properly test the buggy version scenario
 - Blue-Green demo completion
 - Git pull issues with argo-canary-demo-helm repo when `values.yaml` is updated by you and GHES pipeline - Need to work out a solution
 - Move unwanted YAML out of templates to a separate directory in argo-canary-demo-helm repo
+- Understand how rollout canary 50% works with multiple replicas (study values.yamls rollout.steps parameters)
+- How the usual PR request goes to release the app (NOTE: In this demo it's directly pushed to main branch)
 - Presentation
 - Nice diagrams
 - Github Actions credits (Load a Credit card)
