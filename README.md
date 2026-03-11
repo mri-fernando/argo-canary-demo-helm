@@ -469,7 +469,63 @@ sum(rate(istio_requests_total{
 
 ## Blue-Green Deployment Demo
 
-Demonstrate how Blue-Green works with Argo Rollouts.
+* Bump the values.yaml 
+
+```shell
+deploymentStrategy: blue-green
+```
+
+* Bump app.py and commit and push
+
+* Keep sending the HTTP traffic and monitor the rollout
+
+* Example output
+```shell
+
+kubectl argo rollouts get rollout demo-app -n demo -w
+
+
+NAME                                  KIND         STATUS        AGE    INFO
+⟳ demo-app                            Rollout      ॥ Paused      7h49m  
+├──# revision:9                                                         
+│  ├──⧉ demo-app-cf4864b8b            ReplicaSet   ✔ Healthy     4m29s  preview
+│  │  ├──□ demo-app-cf4864b8b-q7rn7   Pod          ✔ Running     4m29s  ready:1/1
+│  │  └──□ demo-app-cf4864b8b-tqlbq   Pod          ✔ Running     4m29s  ready:1/1
+│  └──α demo-app-cf4864b8b-9-pre      AnalysisRun  ✔ Successful  4m20s  ✔ 2
+├──# revision:8                                                         
+│  ├──⧉ demo-app-7cb7bfbd8c           ReplicaSet   ✔ Healthy     40m    stable,active
+│  │  ├──□ demo-app-7cb7bfbd8c-2rxm8  Pod          ✔ Running     29m    ready:1/1
+│  │  └──□ demo-app-7cb7bfbd8c-ftbc5  Pod          ✔ Running     27m    ready:1/1
+│  ├──α demo-app-7cb7bfbd8c-8-2       AnalysisRun  ⚠ Error       36m    ⚠ 5
+│  ├──α demo-app-7cb7bfbd8c-8-2.1     AnalysisRun  ✔ Successful  28m    ✔ 2
+│  └──α demo-app-7cb7bfbd8c-8-5       AnalysisRun  ✔ Successful  27m    ✔ 2
+
+```
+
+* Note that the VirtualService will remain 100:0 as this is a blue/green style deployment
+
+```shell
+kubectl get virtualservice  demo-app -n demo -o yaml 
+
+  http:
+  - name: http
+    route:
+    - destination:
+        host: demo-app-stable
+      weight: 100
+    - destination:
+        host: demo-app-canary
+      weight: 0
+```
+
+* Now Once the Rollout Analysis completes promote it using the ArgoCD UI or CLI 
+
+```shell
+kubectl argo rollouts promote demo-app -n demo
+
+```
+
+* Now you should see the new App, access: http://demo-app.mario.com/
 
 ---
 
@@ -489,9 +545,9 @@ kubectl argo rollouts retry rollout demo-app -n demo
 
 - Zero Time deployments explanation - Canary , Blue/Green strategies
 
-- Finetune `count: 1` and `failureLimit` to properly test the buggy version scenario
+- Finetune `count: 1` and `failureLimit` to properly test the buggy version scenario - DONE
 
-- Blue-Green demo completion
+- In the BlueGreen strategy the prometheus analysis template, how does the preview service receive traffic ? Does Istio ingress gateway send traffic to the preview pods as well?
 
 - Git pull issues with argo-canary-demo-helm repo when `values.yaml` is updated by you and GHES pipeline - Need to work out a solution
 

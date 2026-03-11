@@ -61,6 +61,6 @@ bluegreen:
     - templateName: istio-success-rate
     args:
     - name: service-name
-      value: demo-app-canary.demo.svc.cluster.local
+      value: demo-app-preview.demo.svc.cluster.local
     - name: namespace
       value: demo

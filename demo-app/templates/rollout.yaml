@@ -26,8 +26,8 @@ spec:
 {{ toYaml .Values.canary.rollout.steps | indent 8 }}
 {{- else if eq $strategy "blue-green" }}
     blueGreen:
-      activeService: demo-app-stable
-      previewService: demo-app-canary
+      activeService: demo-app-active
+      previewService: demo-app-preview
       autoPromotionEnabled: false
       scaleDownDelaySeconds: 30
       prePromotionAnalysis:
