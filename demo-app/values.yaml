@@ -21,7 +21,7 @@ service:
 canaryAnalysis:
   success: 0.99 # Success rate threshold for the analysis template
 
-deploymentStrategy: canary # Change to "blue-green" to switch to blue-green deployment strategy
+deploymentStrategy: blue-green # Change to "blue-green" to switch to blue-green deployment strategy
 
 canary: 
   rollout:
