@@ -449,6 +449,18 @@ Demonstrate how Blue-Green works with Argo Rollouts.
 
 ---
 
+## NOTES
+
+### Stable app can't override a Buggy App
+- An extra ordinary circumstance would be if for some reason a problematic app gets rolled out to production and a stable working app version can't be rolled out due to Prometheus analysis template continously failing due to 0.99% being the success critieria for promotion
+
+- Usually this happens if the failure and count in the analysis template are misconfigured
+- To overcome that just bump ```canary.success``` to a lower value, eg: 0.3 and then run:
+
+```shell
+kubectl argo rollouts retry rollout demo-app -n demo
+```
+
 ## TODO
 
 - Zero Time deployments explanation - Canary , Blue/Green strategies
