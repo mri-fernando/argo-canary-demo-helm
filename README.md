@@ -114,6 +114,19 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 
 ---
 
+### 6. Kiali UI for Traffic Visualization 
+
+```shell 
+helm repo add kiali https://kiali.org/helm-charts                                           
+helm repo update
+helm install kiali-server kiali/kiali-server -n istio-system \
+ --set auth.strategy="anonymous" \
+ --set external_services.prometheus.url="http://prometheus-kube-prometheus-prometheus.monitoring:9090"
+
+```
+
+---
+
 ### 6. Helm chart structure
 
 ```shell
@@ -222,6 +235,12 @@ kubectl port-forward svc/demo-app -n demo 8081:80
 curl -vvv http://localhost:8081
 ```
 
+### Access Kiali UI 
+kubectl -n istio-system port-forward svc/kiali 20001:20001 
+http://localhost:20001
+
+![Kiali Traffic Split Demonstration](imgs/kiali-traffic-split.png)
+
 
 #### Get the Public IP
 
@@ -264,6 +283,9 @@ def home():
     return "Hello Auckland k8s Demo - From version 16"
 ```
 
+Show Github Actions for argo-canary-demo-app repository
+
+Manual Promotion by adding "Pause" configuration
 Update `values.yaml`:
 
 ```yaml
@@ -299,7 +321,7 @@ demo-app-86ddf7f6d7   0         0         0       5h32m
 
 ```
 
-### Manually Promote the Canary
+### OPTIONAL: Manually Promote the Canary
 
 * You can use the ArgoCD UI to promote or use the CLI  
 ```shell
@@ -420,6 +442,9 @@ Verify the virtual service weights
 
 ```shell
 kubectl get virtualservice  demo-app -n demo -o yaml
+kubectl get svc demo-app-canary -n demo -o yaml | grep -i hash 
+kubectl get svc demo-app-stable -n demo -o yaml | grep -i hash
+kubectl get rs -n demo
 
 ```
 
@@ -472,7 +497,7 @@ sum(rate(istio_requests_total{
 
 ---
 
-## Blue-Green Deployment Demo
+## TODO: Blue-Green Deployment Demo
 
 * Bump the values.yaml 
 
