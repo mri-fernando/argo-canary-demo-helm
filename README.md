@@ -37,12 +37,16 @@ kubectl config get-contexts
 helm repo add istio https://istio-release.storage.googleapis.com/charts
 helm repo update
 kubectl create namespace istio-system
-helm install istio-base istio/base  -n istio-system
+
+# Install CRDs
+helm install istio-base istio/base  -n istio-system --version=1.29.1
+
 kubectl get crds | grep istio
-helm install istiod istio/istiod -n istio-system
+helm install istiod istio/istiod -n istio-system --version=1.29.1
 kubectl get pods -n istio-system | grep -i istiod
-helm install istio-ingress istio/gateway -n istio-system
+helm install istio-ingress istio/gateway -n istio-system --version=1.29.1
 kubectl get svc -n istio-system | grep -i ingress
+
 ```
 
 ---
@@ -104,6 +108,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
   --set grafana.enabled=false \
   --set alertmanager.enabled=false \
+  --version 83.4.0 \
   --create-namespace
 ```
 
@@ -112,7 +117,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 ### 6. Helm chart structure
 
 ```shell
-helm template demo-app ./demo-app
+helm template demo-app ./demo-app. > demo-app.yaml
 ```
 --- 
 
@@ -214,7 +219,7 @@ kubectl logs -n argo-rollouts deploy/argo-rollouts -f
 
 ```shell
 kubectl port-forward svc/demo-app -n demo 8081:80
-curl -vvv http://localhosts:8081
+curl -vvv http://localhost:8081
 ```
 
 
