@@ -543,6 +543,9 @@ def home():
 - [Github Actions](https://github.com/mri-fernando/argo-canary-demo-app/actions)
 - Sync ArgoCD application (deploys new version)
 
+### Demonstrate Using Kiali UI indicates failure traffic on buggy app
+![Kiali Buggy App Traffic Split](imgs/kiali-canary-failure.png)
+
 
 ### Monitor Prometheus UI:
 
