@@ -33,6 +33,9 @@ kubectl config get-contexts
 
 ### 2. Install Istio Service Mesh
 
+Demonstrate and run through the diagram
+
+
 ```shell
 helm repo add istio https://istio-release.storage.googleapis.com/charts
 helm repo update
@@ -53,6 +56,8 @@ kubectl get svc -n istio-system | grep -i ingress
 
 ### 3. Enable Sidecar Injection for Demo Namespace
 
+Demonstrate and run through the diagram
+
 ```shell
 kubectl create namespace demo
 kubectl label namespace demo istio-injection=enabled
@@ -71,6 +76,8 @@ kubectl get svc -n istio-system
 ---
 
 ### 4. Install ArgoCD and Argo Rollouts
+
+Demonstrate and run through the diagram
 
 ```shell
 kubectl create namespace argo-rollouts
@@ -100,6 +107,8 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 ### 5. Install Prometheus Using Helm Chart
 
+Demonstrate and run through the diagram
+
 ```shell
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
@@ -110,6 +119,8 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
   --set alertmanager.enabled=false \
   --version 83.4.0 \
   --create-namespace
+
+kubectl get po -n monitoring --watch
 ```
 
 ---
@@ -127,7 +138,12 @@ helm install kiali-server kiali/kiali-server -n istio-system \
 
 ---
 
-### 6. Helm chart structure
+### 7. The 2 Repo's and Github actions/Pipelines
+
+Demonstrate and run through the 2 diagrams
+Github actions workflow diagram
+
+### 8. Helm chart structure
 
 ```shell
 helm template demo-app ./demo-app. > demo-app.yaml
@@ -152,7 +168,7 @@ demo-app/templates
 
 ---
 
-### 7. Create ArgoCD Application
+### 9. Create ArgoCD Application
 
 
 ```yaml
@@ -184,7 +200,7 @@ spec:
 
 ---
 
-### 8. Apply the YAML (Ideally should be done through CI CD - In this case it's just kubectl apply -f)
+### 10. Apply the YAML (Ideally should be done through CI CD - In this case it's just kubectl apply -f)
 
 ```shell
 kubectl apply -f argocd/application.yaml
@@ -195,16 +211,19 @@ Access ArgoCD UI: http://localhost:8080/
 
 ---
 
-### 9. Verify Rollout Works
+### 11. Verify Rollout Works
 
 ```shell
 kubectl get rollouts -n demo
 kubectl argo rollouts get rollout demo-app -n demo -w
+
+kubectl get po -n demo
+kubectl get rs -n demo
 ```
 
 ---
 
-### 10. OPTIONAL: RollOuts Dashboard
+### 12. OPTIONAL: RollOuts Dashboard
 
 ```shell
 kubectl argo rollouts dashboard
@@ -214,7 +233,7 @@ Access RollOuts UI : http://localhost:3100/rollouts/
 
 ---
 
-### 11. Troubleshooting
+### 13. Troubleshooting
 
 ```shell
 kubectl logs -n argo-rollouts deploy/argo-rollouts -f
@@ -223,19 +242,19 @@ kubectl logs -n argo-rollouts deploy/argo-rollouts -f
 ---
 
 
-### 11. Run through the objects created by ArgoCD in the UI 
+### 14. Run through the objects created by ArgoCD in the UI 
 
 
-## Accessing the App
+### 15. Accessing the App
 
-### Using K8s Service (No Load Balancing)
+#### Using K8s Service (No Load Balancing)
 
 ```shell
 kubectl port-forward svc/demo-app -n demo 8081:80
 curl -vvv http://localhost:8081
 ```
 
-### Access Kiali UI 
+#### OPTIONAL: Access Kiali UI 
 kubectl -n istio-system port-forward svc/kiali 20001:20001 
 http://localhost:20001
 
@@ -262,7 +281,11 @@ sudo vi /etc/hosts
 
 ---
 
-### Access ArgoCD, Prometheus, and App UI
+### 16. Access ArgoCD, Prometheus, and App UI
+
+```shell
+kubectl get gateway -A -o yaml 
+```
 
 - **App:** [http://demo-app.mario.com](http://demo-app.mario.com)
 - **ArgoCD:** [https://argo-demo.mario.com](https://argo-demo.mario.com)
@@ -272,18 +295,40 @@ sudo vi /etc/hosts
 
 ## Manual Promotion Demo
 
-### Bump app.py and Rollout a New Version
+### Access Prometheus, Load Test / send Traffic, Bump app.py and Rollout a New Version
 
-Bump app.py
+
+Simulate Load 
 ```shell
-@app.route("/")
-def home():
-...
-...
-    return "Hello Auckland k8s Demo - From version 16"
+while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
 ```
 
-Show Github Actions for argo-canary-demo-app repository
+Access Prometheus
+http://prometheus.mario.com/query
+
+```promql
+sum(rate(istio_requests_total{
+  reporter="destination",
+  destination_service=~"demo-app-canary.demo.svc.cluster.local",
+  destination_workload_namespace="demo",
+  response_code!~"5.*"
+}[2m]))
+/
+sum(rate(istio_requests_total{
+  reporter="destination",
+  destination_service=~"demo-app-canary.demo.svc.cluster.local",
+  destination_workload_namespace="demo"
+}[2m]))
+```
+
+
+Go through the ReplicaSet, SVC Object and ReplicaSet hash
+
+```shell 
+kubectl get rs -n demo
+kubectl get svc -n demo demo-app-canary -o yaml | grep -i hash
+kubectl get svc -n demo demo-app-stable -o yaml | grep -i hash
+```
 
 Manual Promotion by adding "Pause" configuration
 Update `values.yaml`:
@@ -296,6 +341,17 @@ rollout:
   - setWeight: 50
   - pause: {duration: 30s} #Waits for 30s and proceeds to 100%
 ```
+
+Bump app.py
+```shell
+@app.route("/")
+def home():
+...
+...
+    return "Hello Auckland k8s Demo - From version 16"
+```
+
+Show Github Actions for argo-canary-demo-app repository
 
 **This will return a mix of traffic to both stable and canary:**
 
@@ -319,6 +375,20 @@ demo-app-86ddf7f6d7   0         0         0       5h32m
 ...
 ...
 
+```
+
+### Demonstrate how Istio VirtualService is bumped by Argo Rollouts
+```shell
+kubectl get virtualservice  demo-app -n demo -o yaml
+
+  - name: http
+    route:
+    - destination:
+        host: demo-app-stable
+      weight: 90
+    - destination:
+        host: demo-app-canary
+      weight: 10
 ```
 
 ### OPTIONAL: Manually Promote the Canary
@@ -351,39 +421,11 @@ kubectl port-forward po/demo-app-545b8b555b-b44nk -n demo 15090:15090
 curl http://localhost:15090/stats/prometheus  | grep -i istio_requests_total
 ```
 
-### Display Prometheus Metrics in the UI
-
-Send requests to [http://demo-app.mario.com/](http://demo-app.mario.com/)
-
-```shell
-while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
-```
-
-- Prometheus UI: [http://prometheus.mario.com/](http://prometheus.mario.com/)
-- Metric: `istio_requests_total`
-
-Prometheus Query Example:
-
-```promql
-sum(rate(istio_requests_total{
-  reporter="destination",
-  destination_service=~"demo-app-canary.demo.svc.cluster.local",
-  destination_workload_namespace="demo",
-  response_code!~"5.*"
-}[2m]))
-/
-sum(rate(istio_requests_total{
-  reporter="destination",
-  destination_service=~"demo-app-canary.demo.svc.cluster.local",
-  destination_workload_namespace="demo"
-}[2m]))
-```
-
 ---
 
 ## Automated Promotion Demo
 
-Keep this running in the background:
+Make sure to Keep this running in the background:
 
 ```shell
 while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
@@ -466,13 +508,6 @@ def home():
 - [Github Actions](https://github.com/mri-fernando/argo-canary-demo-app/actions)
 - Sync ArgoCD application (deploys new version)
 
-### Monitor the rollout
-
-```shell
-kubectl argo rollouts get rollout demo-app -n demo -w
-kubectl get virtualservice demo-app -n demo -o yaml
-kubectl describe AnalysisTemplate -n demo
-```
 
 ### Monitor Prometheus UI:
 
@@ -495,9 +530,23 @@ sum(rate(istio_requests_total{
 }[2m]))
 ```
 
+
+### Monitor the rollout
+
+```shell
+kubectl argo rollouts get rollout demo-app -n demo -w
+kubectl get virtualservice demo-app -n demo -o yaml
+kubectl describe AnalysisTemplate -n demo
+
+kubectl get svc demo-app-canary -n demo -o yaml | grep -i hash 
+kubectl get svc demo-app-stable -n demo -o yaml | grep -i hash
+kubectl get rs -n demo
+
+```
+
 ---
 
-## TODO: Blue-Green Deployment Demo
+## TODO: Blue-Green Deployment - NEXT Demo
 
 * Bump the values.yaml 
 
@@ -571,19 +620,7 @@ kubectl argo rollouts promote demo-app -n demo
 kubectl argo rollouts retry rollout demo-app -n demo
 ```
 
-## TODO
-
-- Zero Time deployments explanation - Canary , Blue/Green strategies
-
-- Finetune `count: 1` and `failureLimit` to properly test the buggy version scenario - DONE
-
-- In the BlueGreen strategy the prometheus analysis template, how does the preview service receive traffic ? Does Istio ingress gateway send traffic to the preview pods as well?
-
-- Git pull issues with argo-canary-demo-helm repo when `values.yaml` is updated by you and GHES pipeline - Need to work out a solution
-
-- Move unwanted YAML out of templates to a separate directory in argo-canary-demo-helm repo
-
-- Understand how rollout canary 50% works with multiple replicas (study values.yamls rollout.steps parameters)
+## Common Questions
 
 - Que: Does rollout CRD support readiness/liveness probes - Ans: Yes, the Argo Rollouts CRD fully supports readiness and liveness probes. You define these probes in the pod template section of the Rollout resource, just like in a standard Kubernetes Deployment
 
@@ -595,13 +632,6 @@ kubectl argo rollouts retry rollout demo-app -n demo
 
 - How the usual PR request goes to release the app (NOTE: In this demo it's directly pushed to main branch)
 
-- Presentation
-
-- Nice diagrams
-
-- Github Actions credits (Load a Credit card)
-
-- Azure credits (Load a Credit card)
 
 
 
