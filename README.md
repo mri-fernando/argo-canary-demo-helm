@@ -363,6 +363,11 @@ Click on Sync on Argo App
 ```shell
 while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
 ```
+
+
+**Demonstrate Using Kiali UI how traffic is distributed**
+
+
 ### Demonstrate Traffic Splitting using Istio VirtualService and svc objects selectors
 ```shell
 kubectl get svc -n demo  demo-app-stable -o yaml
