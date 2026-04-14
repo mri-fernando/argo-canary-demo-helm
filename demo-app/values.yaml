@@ -11,7 +11,7 @@ prometheus:
 
 image:
   repository: roshaneishara/argo-canary-demo-app
-  tag: v40
+  tag: v41
   pullPolicy: Always
 
 service:
