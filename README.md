@@ -20,11 +20,11 @@ az provider register --namespace Microsoft.OperationalInsights
 az provider register --namespace Microsoft.ContainerService
 az provider show -n Microsoft.OperationalInsights
 az provider show -n Microsoft.ContainerService
-az group create --name mario-aks-auckland-meetup-2026-demo --location australiaeast
-az aks create --resource-group mario-aks-auckland-meetup-2026-demo --name mario-aks-auckland-demo-aks --node-count 1 --enable-addons monitoring --generate-ssh-keys
+az group create --name mario-aks-auckland-meetup-2026-demo-1 --location australiaeast
+az aks create --resource-group mario-aks-auckland-meetup-2026-demo-1 --name mario-aks-auckland-demo-1 --node-count 1 --enable-addons monitoring --generate-ssh-keys
 
 az aks list --output table
-az aks get-credentials --resource-group mario-aks-auckland-meetup-2026-demo --name mario-aks-auckland-demo-aks
+az aks get-credentials --resource-group mario-aks-auckland-meetup-2026-demo-1 --name mario-aks-auckland-demo-1
 
 kubectl config get-contexts
 ```
@@ -125,7 +125,7 @@ kubectl get po -n monitoring --watch
 
 ---
 
-### 6. Kiali UI for Traffic Visualization 
+### 6. OPTIONAL: Kiali UI for Traffic Visualization 
 
 ```shell 
 helm repo add kiali https://kiali.org/helm-charts                                           
@@ -146,7 +146,7 @@ Github actions workflow diagram
 ### 8. Helm chart structure
 
 ```shell
-helm template demo-app ./demo-app. > demo-app.yaml
+helm template demo-app ./demo-app > demo-app.yaml
 ```
 --- 
 
@@ -293,7 +293,7 @@ kubectl get gateway -A -o yaml
 
 ---
 
-## Manual Promotion Demo
+## Manual Promotion Demo (No Prometheus Analysis)
 
 ### Access Prometheus, Load Test / send Traffic, Bump app.py and Rollout a New Version
 
@@ -352,6 +352,8 @@ def home():
 ```
 
 Show Github Actions for argo-canary-demo-app repository
+
+Click on Sync on Argo App
 
 **This will return a mix of traffic to both stable and canary:**
 
@@ -433,6 +435,11 @@ Make sure to Keep this running in the background:
 
 ```shell
 while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e "\n\n"; done
+```
+
+- Pull changes from remote
+```shell
+git pull
 ```
 
 - Bump `values.yaml` in rollout block to 
@@ -635,10 +642,3 @@ kubectl argo rollouts retry rollout demo-app -n demo
 - Que: Why not use Istio subset level (istio destination rules) but use Host level traffic - Ans: With host-level splitting, the VirtualService requires different host values to split among the two destinations. However, using two host values implies the use of different DNS names (one for the canary, the other for the stable). For north-south traffic, which reaches the Service through the Istio Gateway, having multiple DNS names to reach the canary vs. stable pods may not matter. However, for east-west or intra-cluster traffic, it forces microservice-to-microservice communication to choose whether to hit the stable or the canary DNS name, go through the gateway, or add DNS entries for the VirtualServices. In this situation, the DestinationRule subset traffic splitting would be a better option for intra-cluster canarying.
 
 - How the usual PR request goes to release the app (NOTE: In this demo it's directly pushed to main branch)
-
-
-
-
-
-
-
