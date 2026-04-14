@@ -394,6 +394,10 @@ kubectl get virtualservice  demo-app -n demo -o yaml
 ### OPTIONAL: Manually Promote the Canary
 
 * You can use the ArgoCD UI to promote or use the CLI  
+
+![ArgoCD UI to manually promote](imgs/argo-rollout-promote.png)
+
+
 ```shell
 kubectl argo rollouts promote demo-app -n demo
 ```
