@@ -506,6 +506,11 @@ kubectl get rs -n demo
 
 ## Automated Rollback Demo - With a Buggy App
 
+- Pull changes from remote
+```shell
+git pull
+```
+
 - Bump `app.py` and commit / push (Github Actions should rollout a buggy version)
 
 ```shell
