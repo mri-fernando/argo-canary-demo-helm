@@ -145,6 +145,9 @@ Github actions workflow diagram
 
 ### 8. Helm chart structure
 
+Walk through the High Level overview diagram
+Walk through the Helm templates
+
 ```shell
 helm template demo-app ./demo-app > demo-app.yaml
 ```
@@ -410,6 +413,15 @@ kubectl get virtualservice  demo-app -n demo -o yaml
 
 ```
 
+#### Explain the Argo CD IgnoreDifference block now 
+```shell
+  ignoreDifferences:
+    - group: networking.istio.io
+      kind: VirtualService
+      jsonPointers:
+        - /spec/http/0/route
+```
+
 #### NOTE: If something goes wrong
 
 ```shell
@@ -420,7 +432,7 @@ kubectl argo rollouts abort demo-app -n demo
 ## Istio Envoy Prometheus Metrics Demo
 
 ```shell
-kubectl get servicemonitor -n monitoring -o yaml
+kubectl get servicemonitor demo-istio -n monitoring -o yaml
 kubectl get po -n demo
 
 kubectl port-forward po/demo-app-545b8b555b-b44nk -n demo 15090:15090
@@ -429,7 +441,7 @@ curl http://localhost:15090/stats/prometheus  | grep -i istio_requests_total
 
 ---
 
-## Automated Promotion Demo
+## Automated Promotion Demo (Using Prometheus Metrics Analysis)
 
 Make sure to Keep this running in the background:
 
@@ -490,6 +502,8 @@ while True; do curl http://demo-app.mario.com; echo -e "\nrequest sent"; echo -e
 ```
 
 - Sync ArgoCD application
+
+- Monitor Prometheus metrics 
 
 Verify the virtual service weights
 
