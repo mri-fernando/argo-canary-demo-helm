@@ -662,13 +662,46 @@ kubectl argo rollouts retry rollout demo-app -n demo
 
 - Que: Does rollout CRD support readiness/liveness probes - Ans: Yes, the Argo Rollouts CRD fully supports readiness and liveness probes. You define these probes in the pod template section of the Rollout resource, just like in a standard Kubernetes Deployment
 
-- Que: By default does the traffic sent once the pod is up/running - Analysis runs after pod initialization and readiness probe passes - Ans: The pod must be ready for the analysis template to execute
+- Que: How do you handle database migrations during a canary rollout?
+- Ans: Backwards-compatible migrations only — the canary and stable versions must be able to run against the same schema simultaneously. Use expand/contract migration patterns
 
-- Que: Why use Istio as the Ingress for North South Traffic - That's to keep it simple as we don't need to introduce more complexity 
+- Que: How do you scale this pattern across 50+ microservices?
+- Ans: Use ArgoCD ApplicationSets to template the Application CRD per service, a shared Helm library chart for the rollout/VirtualService boilerplate, make sure the CI pipeline is robust with end-to-end testcases, and a centralised AnalysisTemplate in a common namespace. Also at the beginning recommended to start with the manual promotion mode which i showed initially. Later gradually automate the promotion of canaries
+
+- Que: ApplicationSet vs App of Apps Difference
+- Ans: Application Sets — uses generators to dynamically create Applications from a template. For 50+ microservices 
+App of Apps - App of Apps — you manually maintain a parent Application that references child Applications. Scaling to 50+ means maintaining 50+ child app manifests by hand. It's a directory/repo structure pattern, not a generator
+
+- Que: By default does the traffic sent once the pod is up/running
+- Ans:  Analysis runs after pod initialization and readiness probe passes - Ans: The pod must be ready for the analysis template to execute
+
+- Que: Why use Istio as the Ingress for North South Traffic 
+- Ans: That's to keep it simple as we don't need to introduce more complexity 
 
 - Que: Why not use Istio subset level (istio destination rules) but use Host level traffic 
-- Ans: Because with DestinationRules, one DNS name routes to both stable and canary via subsets — east-west (service-to-service) traffic doesn't need to know which version to call.
+- Ans: The demo focuses on North South traffic where the traffic will come from the internet --> AZ LB --> Istio Ingress Pods --> Python App Istio Virtual Svc. Because with DestinationRules, one DNS name with host level splitting routes to both stable and canary via subsets 
 
-Host-level splitting requires two different DNS names, which forces every upstream microservice to explicitly choose between demo-app-stable or demo-app-canary — that leaks deployment implementation details into your service graph.
+Note: For internal service to service, i.e: east-west (service-to-service) traffic it doesn't need to know which version (Stable or Canary) to call, in this case destination subsets are better 
+
+- Que: What happens if Prometheus is down during an analysis run?
+- Ans: The analysis will error/fail, which counts toward failureLimit. If exceeded, the rollout aborts — fail-safe by default
+
+- Que: Can you run multiple analysis templates in parallel?
+- Ans: Yes — you can define multiple templates in the analysis step and they run concurrently. All must pass for promotion to proceed
+
+- Que: What if Prometheus scraping has gaps — can false rollbacks occur?
+- Ans: Yes. Use a meaningful [2m] window and set count/failureLimit conservatively. Also consider a initialDelay in the analysis to let metrics warm up before evaluation.
+
+- Que: How does blue-green differ from canary here in terms of traffic?
+- Ans: Blue-green keeps VirtualService at 100:0 -  no live traffic goes to the new version until manually/automatically promoted. Canary gradually shifts traffic
+
+- Que: Why not use Flagger instead of Argo Rollouts?
+- Ans: Both are valid. Argo Rollouts integrates natively with ArgoCD (same ecosystem), has a richer UI/CLI, and supports more deployment strategies out of the box
+
+Que: What's the blast radius if the canary is rolled back — do users see errors?
+- Ans: Minimal. At 10% weight, only 10% of users hit the canary. On abort, Argo Rollouts sets canary weight back to 0 and scales down the canary ReplicaSet
+
+Que: Is Istio's sidecar injection a performance concern in production?
+- Ans: Yes — each sidecar adds 50ms cold start and memory overhead (50MB per pod). Tune resource requests/limits on the sidecar and evaluate if the observability/security trade-off is worth it.
 
 - How the usual PR request goes to release the app (NOTE: In this demo it's directly pushed to main branch)
