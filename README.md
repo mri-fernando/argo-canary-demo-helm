@@ -660,48 +660,82 @@ kubectl argo rollouts retry rollout demo-app -n demo
 
 ## Common Questions
 
-- Que: Does rollout CRD support readiness/liveness probes - Ans: Yes, the Argo Rollouts CRD fully supports readiness and liveness probes. You define these probes in the pod template section of the Rollout resource, just like in a standard Kubernetes Deployment
+Que: Does rollout CRD support readiness/liveness probes 
+- Yes, the Argo Rollouts CRD fully supports readiness and liveness probes. 
+- You define these probes in the pod template section of the Rollout resource, just like in a standard Kubernetes Deployment
 
-- Que: How do you handle database migrations during a canary rollout?
-- Ans: Backwards-compatible migrations only — the canary and stable versions must be able to run against the same schema simultaneously. Use expand/contract migration patterns
+---
+Que: How do you handle database migrations during a canary rollout?
+- Backwards-compatible migrations only — the canary and stable versions must be able to run against the same schema simultaneously. 
 
-- Que: How do you scale this pattern across 50+ microservices?
-- Ans: Use ArgoCD ApplicationSets to template the Application CRD per service, a shared Helm library chart for the rollout/VirtualService boilerplate, make sure the CI pipeline is robust with end-to-end testcases, and a centralised AnalysisTemplate in a common namespace. Also at the beginning recommended to start with the manual promotion mode which i showed initially. Later gradually automate the promotion of canaries
+---
+Que: How do you scale this pattern across 50+ microservices?
+- Use ArgoCD ApplicationSets to template the Application CRD per service, a shared Helm library chart for the rollout/VirtualService boilerplate, make sure the CI pipeline is robust with end-to-end testcases, and a centralised AnalysisTemplate in a common namespace. 
+- Also at the beginning recommended to start with the manual promotion mode which i showed initially. Later gradually automate the promotion of canaries
 
-- Que: ApplicationSet vs App of Apps Difference
-- Ans: Application Sets — uses generators to dynamically create Applications from a template. For 50+ microservices 
-App of Apps - App of Apps — you manually maintain a parent Application that references child Applications. Scaling to 50+ means maintaining 50+ child app manifests by hand. It's a directory/repo structure pattern, not a generator
+---
+Que: ApplicationSet vs App of Apps Difference
+- Application Sets — uses generators to dynamically create Applications from a template for 50+ microservices 
+- App of Apps - App of Apps — you manually maintain a parent Application that references child Applications. 
+- Scaling to 50+ means maintaining 50+ child app manifests by hand. It's a directory/repo structure pattern, not a generator
 
-- Que: By default does the traffic sent once the pod is up/running
-- Ans:  Analysis runs after pod initialization and readiness probe passes - Ans: The pod must be ready for the analysis template to execute
+---
+Que: By default does the traffic sent once the pod is up/running
+- Analysis runs after pod initialization and readiness probe passes 
+- The pod must be ready for the analysis template to execute
 
-- Que: Why use Istio as the Ingress for North South Traffic 
-- Ans: That's to keep it simple as we don't need to introduce more complexity 
+---
+Que: Why use Istio as the Ingress for North South Traffic 
+- That's to keep it simple as we don't need to introduce more complexity 
 
-- Que: Why not use Istio subset level (istio destination rules) but use Host level traffic 
-- Ans: The demo focuses on North South traffic where the traffic will come from the internet --> AZ LB --> Istio Ingress Pods --> Python App Istio Virtual Svc. Because with DestinationRules, one DNS name with host level splitting routes to both stable and canary via subsets 
+---
+Que: Why not use Istio subset level (istio destination rules) but use Host level traffic 
+- The demo focuses on North South traffic where the traffic will come from the internet --> AZ LB --> Istio Ingress Pods --> Python App Istio Virtual Svc. Because with DestinationRules, one DNS name with host level splitting routes to both stable and canary via subsets 
 
-Note: For internal service to service, i.e: east-west (service-to-service) traffic it doesn't need to know which version (Stable or Canary) to call, in this case destination subsets are better 
+***Note***: For internal service to service, i.e: east-west (service-to-service) traffic it doesn't need to know which version (Stable or Canary) to call, in this case destination subsets are better 
 
-- Que: What happens if Prometheus is down during an analysis run?
-- Ans: The analysis will error/fail, which counts toward failureLimit. If exceeded, the rollout aborts — fail-safe by default
+---
+Que: What happens if Prometheus is down during an analysis run?
+- The analysis will error/fail, which counts toward failureLimit. 
+- If exceeded, the rollout aborts — fail-safe by default
 
-- Que: Can you run multiple analysis templates in parallel?
-- Ans: Yes — you can define multiple templates in the analysis step and they run concurrently. All must pass for promotion to proceed
+---
+Que: Can you run multiple analysis templates in parallel?
+- Yes — you can define multiple templates in the analysis step and they run concurrently. All must pass for promotion to proceed
 
-- Que: What if Prometheus scraping has gaps — can false rollbacks occur?
-- Ans: Yes. Use a meaningful [2m] window and set count/failureLimit conservatively. Also consider a initialDelay in the analysis to let metrics warm up before evaluation.
+---
+Que: What if Prometheus scraping has gaps — can false rollbacks occur?
+- Yes. Use a meaningful [2m] window and set count/failureLimit conservatively. Also consider a initialDelay in the analysis to let metrics warm up before evaluation.
 
-- Que: How does blue-green differ from canary here in terms of traffic?
-- Ans: Blue-green keeps VirtualService at 100:0 -  no live traffic goes to the new version until manually/automatically promoted. Canary gradually shifts traffic
+---
+Que: How does blue-green differ from canary here in terms of traffic?
+- Blue-green keeps VirtualService at 100:0 -  no live traffic goes to the new version until manually/automatically promoted. 
+- Canary gradually shifts traffic
 
-- Que: Why not use Flagger instead of Argo Rollouts?
-- Ans: Both are valid. Argo Rollouts integrates natively with ArgoCD (same ecosystem), has a richer UI/CLI, and supports more deployment strategies out of the box
+---
+Que: Why not use Flagger instead of Argo Rollouts?
+- Both are valid. Argo Rollouts integrates natively with ArgoCD (same ecosystem), has a richer UI/CLI, and supports more deployment strategies out of the box
 
+---
 Que: What's the blast radius if the canary is rolled back — do users see errors?
-- Ans: Minimal. At 10% weight, only 10% of users hit the canary. On abort, Argo Rollouts sets canary weight back to 0 and scales down the canary ReplicaSet
+- Minimal. At 10% weight, only 10% of users hit the canary. 
+- On abort, Argo Rollouts sets canary weight back to 0 and scales down the canary ReplicaSet
 
+---
 Que: Is Istio's sidecar injection a performance concern in production?
-- Ans: Yes — each sidecar adds 50ms cold start and memory overhead (50MB per pod). Tune resource requests/limits on the sidecar and evaluate if the observability/security trade-off is worth it.
+- Yes — each sidecar adds 50ms cold start and memory overhead (50MB per pod). 
+- FineTune resource requests/limits on the sidecar and evaluate if the observability/security trade-off is worth it.
 
+---
 - How the usual PR request goes to release the app (NOTE: In this demo it's directly pushed to main branch)
+- Developer raises a PR with code changes to app.py
+- CI runs on the PR: unit tests, lint, build Docker image (not pushed yet)
+- PR reviewed and merged to main
+- GitHub Actions triggers on merge: builds image, tags it (e.g., v37), pushes to container registry
+- Helm/GitOps Repo (argo-canary-demo-helm):
+
+- GitHub Actions in the app repo (or a separate bot) raises a PR on the Helm repo bumping image.tag: v37 in values.yaml
+- PR reviewed (infra/platform team) and merged
+- ArgoCD detects the change and auto-syncs (or a manual sync is triggered)
+- Argo Rollouts picks up the new image and begins the canary rollout
+
